@@ -120,7 +120,7 @@ class Profiler(object):
 
                 return parent.children_dict[frame_name]
 
-            for stack, self_time in self.stack_self_time.iteritems():
+            for stack, self_time in self.stack_self_time.items():
                 frame_for_stack(stack).self_time = self_time
 
         return self._root_frame
@@ -146,8 +146,8 @@ class Profiler(object):
         else:
             return self.first_interesting_frame()
 
-    def output_text(self, root=False, unicode=False, color=False):
-        return self.starting_frame(root=root).as_text(unicode=unicode, color=color)
+    def output_text(self, root=False, str=False, color=False):
+        return self.starting_frame(root=root).as_text(str=str, color=color)
 
     def output_html(self, root=False):
         resources_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources/')
@@ -271,7 +271,7 @@ class Frame(object):
 
     @property
     def children(self):
-        return self.children_dict.values()
+        return list(self.children_dict.values())
 
     @property
     def sorted_children(self):
@@ -283,35 +283,35 @@ class Frame(object):
     def add_child(self, child):
         self.children_dict[child.identifier] = child
 
-    def as_text(self, indent=u'', child_indent=u'', unicode=False, color=False):
+    def as_text(self, indent='', child_indent='', str=False, color=False):
         colors = colors_enabled if color else colors_disabled
         time_str = '{:.3f}'.format(self.time())
 
         if color:
             time_str = self._ansi_color_for_time() + time_str + colors.end
 
-        result = u'{indent}{time_str} {function}  {c.faint}{code_position}{c.end}\n'.format(
+        result = '{indent}{time_str} {function}  {c.faint}{code_position}{c.end}\n'.format(
             indent=indent,
             time_str=time_str,
             function=self.function,
             code_position=self.code_position_short,
             c=colors_enabled if color else colors_disabled)
 
-        children = filter(lambda f: f.proportion_of_total > 0.01, self.sorted_children)
+        children = [f for f in self.sorted_children if f.proportion_of_total > 0.01]
 
         if children:
             last_child = children[-1]
 
         for child in children:
             if child is not last_child:
-                c_indent = child_indent + (u'├─ ' if unicode else '|- ')
-                cc_indent = child_indent + (u'│  ' if unicode else '|  ')
+                c_indent = child_indent + ('├─ ' if str else '|- ')
+                cc_indent = child_indent + ('│  ' if str else '|  ')
             else:
-                c_indent = child_indent + (u'└─ ' if unicode else '`- ')
-                cc_indent = child_indent + u'   '
+                c_indent = child_indent + ('└─ ' if str else '`- ')
+                cc_indent = child_indent + '   '
             result += child.as_text(indent=c_indent,
                                     child_indent=cc_indent,
-                                    unicode=unicode,
+                                    str=str,
                                     color=color)
 
         return result

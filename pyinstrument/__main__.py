@@ -38,25 +38,25 @@ def main():
         profiler.start()
 
         try:
-            exec code in globs, None
-        except SystemExit, KeyboardInterrupt:
+            exec(code, globs, None)
+        except SystemExit as KeyboardInterrupt:
             pass
 
         profiler.stop()
 
         if options.outfile:
             f = codecs.open(options.outfile, 'w', 'utf-8')
-            unicode = True
+            str = True
             color = False
         else:
             f = sys.stdout
-            unicode = stdout_supports_unicode()
+            str = stdout_supports_unicode()
             color = stdout_supports_color()
 
         if options.output_html:
             f.write(profiler.output_html())
         else:
-            f.write(profiler.output_text(unicode=unicode, color=color))
+            f.write(profiler.output_text(str=str, color=color))
 
         f.close()
     else:
